@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRI QUADRON — トライ・クアドロン</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- タイトル画面 -->
+  <section id="screen-title" class="screen active">
+    <div class="title-wrap">
+      <div class="title-emblem">
+        <div class="emblem-grid">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span class="lit"></span><span></span><span></span>
+          <span></span><span></span><span class="lit"></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <h1>TRI QUADRON</h1>
+      <p class="subtitle">トライ・クアドロン</p>
+      <p class="tagline">役作りと陣取り、そして正体隠匿の4人用頭脳戦</p>
+
+      <div class="profile-bar" id="profile-bar">
+        <div class="profile-bar-avatar" id="profile-bar-avatar"></div>
+        <div class="profile-bar-name" id="profile-bar-name">プレイヤー1</div>
+        <button class="btn btn-tiny" id="btn-edit-profile">プロフィール編集</button>
+      </div>
+
+      <button id="btn-start" class="btn btn-primary btn-large">対局を始める（4人でパス&プレイ）</button>
+      <button id="btn-start-cpu" class="btn btn-primary btn-large">CPUと対戦する</button>
+      <button id="btn-start-online" class="btn btn-primary btn-large">オンラインで対戦する</button>
+      <button id="btn-rules" class="btn btn-ghost">ルールを見る</button>
+    </div>
+  </section>
+
+  <!-- プロフィール編集モーダル -->
+  <div id="modal-profile" class="modal">
+    <div class="modal-box modal-box-wide">
+      <h3>プロフィール設定</h3>
+      <p class="modal-note">この情報はこの端末のブラウザに保存され、次回もそのまま使われます。</p>
+      <label class="profile-name-label">表示名（12文字まで）
+        <input type="text" id="profile-name-input" maxlength="12" placeholder="プレイヤー1">
+      </label>
+
+      <div class="avatar-preview-row">
+        <div class="avatar-preview-large" id="avatar-preview-large"></div>
+        <div class="avatar-preview-hint">パーツを選んでオリジナルのアバターを作ろう</div>
+      </div>
+
+      <div class="avatar-part-tabs" id="avatar-part-tabs"></div>
+      <div class="avatar-part-grid" id="avatar-part-grid"></div>
+      <div class="avatar-color-label">色</div>
+      <div class="avatar-part-colors" id="avatar-part-colors"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="btn-cancel-profile">キャンセル</button>
+        <button class="btn btn-primary" id="btn-save-profile">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CPU対戦相手 選択画面 -->
+  <!-- オンライン対戦：ルームホーム（作成／入室） -->
+  <section id="screen-room-home" class="screen">
+    <div class="panel-narrow">
+      <h2>オンライン対戦</h2>
+      <p class="draft-note" id="room-home-transport-note"></p>
+      <button class="btn btn-primary btn-large" id="btn-create-room">ルームを作成する</button>
+      <div class="room-join-box">
+        <div class="room-join-label">ルームIDを入力して入室</div>
+        <div class="room-join-row">
+          <input type="text" id="room-id-input" maxlength="5" inputmode="numeric" placeholder="12345">
+          <button class="btn btn-primary" id="btn-join-room">入室する</button>
+        </div>
+        <p class="room-join-error" id="room-join-error"></p>
+      </div>
+      <button class="btn btn-ghost" id="btn-room-home-back">タイトルへ戻る</button>
+    </div>
+  </section>
+
+  <!-- オンライン対戦：ルームロビー -->
+  <section id="screen-room-lobby" class="screen">
+    <div class="panel-narrow panel-wide">
+      <div class="lobby-header">
+        <div class="lobby-room-name-row">
+          <h2 id="lobby-room-name">〇〇の部屋</h2>
+          <button class="btn btn-tiny" id="btn-edit-room-name" hidden>編集</button>
+        </div>
+        <div class="lobby-room-id">ルームID：<span id="lobby-room-id">-----</span></div>
+      </div>
+
+      <div class="objective-settings-box">
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-timer">▸ 手番制限時間を設定する（なし）</button>
+        <div class="timer-options-box" id="timer-options-box" hidden>
+          <div class="timer-options" id="timer-options">
+            <button type="button" class="btn btn-tiny timer-btn" data-sec="0">なし</button>
+            <button type="button" class="btn btn-tiny timer-btn" data-sec="30">30秒</button>
+            <button type="button" class="btn btn-tiny timer-btn" data-sec="60">60秒</button>
+            <button type="button" class="btn btn-tiny timer-btn" data-sec="90">90秒</button>
+            <button type="button" class="btn btn-tiny timer-btn" data-sec="180">180秒</button>
+            <button type="button" class="btn btn-tiny timer-btn" data-sec="300">300秒</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-lobby-exclude">▸ 目標カードを除外する</button>
+        <div class="objective-exclude-list" id="lobby-exclude-list" hidden></div>
+
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-lobby-count">▸ 選択肢数を設定する（2枚）</button>
+        <div class="choice-count-box" id="lobby-count-box" hidden>
+          <div class="choice-count-options" id="lobby-count-options">
+            <button type="button" class="btn btn-tiny lobby-count-btn" data-count="1">1枚</button>
+            <button type="button" class="btn btn-tiny lobby-count-btn" data-count="2">2枚</button>
+            <button type="button" class="btn btn-tiny lobby-count-btn" data-count="3">3枚</button>
+            <button type="button" class="btn btn-tiny lobby-count-btn" data-count="4">4枚</button>
+            <button type="button" class="btn btn-tiny lobby-count-btn" data-count="5">5枚</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lobby-player-list" id="lobby-player-list"></div>
+
+      <div class="lobby-footer">
+        <button class="btn btn-ghost" id="btn-leave-room">ルームを出る</button>
+        <button class="btn btn-primary" id="btn-my-ready">準備完了</button>
+        <button class="btn btn-primary btn-large" id="btn-lobby-start" hidden disabled>ゲーム開始</button>
+      </div>
+      <p class="lobby-note" id="lobby-note"></p>
+    </div>
+  </section>
+
+  <!-- CPUキャラクター選択（ロビーの空席用） -->
+  <div id="modal-lobby-cpu-pick" class="modal">
+    <div class="modal-box modal-box-wide">
+      <h3>CPUキャラクターを選択</h3>
+      <div class="cpu-select-grid" id="lobby-cpu-pick-grid"></div>
+      <button class="btn btn-ghost" id="btn-cancel-lobby-cpu-pick">キャンセル</button>
+    </div>
+  </div>
+
+  <section id="screen-cpu-select" class="screen">
+    <div class="panel-narrow panel-wide">
+      <h2>対戦相手を選択（3人）</h2>
+      <p class="draft-note" id="cpu-select-note">カードをタップして、プレイヤー2・3・4の対戦相手を順番に選んでください。同じキャラを複数回選ぶこともできます。</p>
+      <div class="cpu-seats" id="cpu-seats"></div>
+
+      <div class="turn-order-box">
+        <div class="turn-order-label">あなたの手番</div>
+        <div class="turn-order-options" id="turn-order-options">
+          <button type="button" class="btn btn-tiny turn-order-btn" data-pos="random">ランダム</button>
+          <button type="button" class="btn btn-tiny turn-order-btn" data-pos="0">1番目</button>
+          <button type="button" class="btn btn-tiny turn-order-btn" data-pos="1">2番目</button>
+          <button type="button" class="btn btn-tiny turn-order-btn" data-pos="2">3番目</button>
+          <button type="button" class="btn btn-tiny turn-order-btn" data-pos="3">4番目</button>
+        </div>
+      </div>
+
+      <div class="objective-settings-box">
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-exclude">▸ 目標カードを除外する</button>
+        <div class="objective-exclude-list" id="objective-exclude-list" hidden></div>
+
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-choice-count">▸ 選択肢数を設定する（2枚）</button>
+        <div class="choice-count-box" id="choice-count-box" hidden>
+          <div class="choice-count-options" id="choice-count-options">
+            <button type="button" class="btn btn-tiny choice-count-btn" data-count="1">1枚</button>
+            <button type="button" class="btn btn-tiny choice-count-btn" data-count="2">2枚</button>
+            <button type="button" class="btn btn-tiny choice-count-btn" data-count="3">3枚</button>
+            <button type="button" class="btn btn-tiny choice-count-btn" data-count="4">4枚</button>
+            <button type="button" class="btn btn-tiny choice-count-btn" data-count="5">5枚</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cpu-select-grid" id="cpu-select-grid"></div>
+      <div class="cpu-select-footer">
+        <button class="btn btn-ghost" id="btn-cpu-select-reset">選び直す</button>
+        <button class="btn btn-primary btn-large" id="btn-cpu-select-start" disabled>対局を始める</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ルール簡易表示 -->
+  <section id="screen-rules" class="screen">
+    <div class="panel-narrow">
+      <h2>遊び方（要約）</h2>
+      <ol class="rules-list">
+        <li><strong>目標ドラフト</strong>：配られた2枚の目標形状カードから1枚を選び伏せます。残り4形状が公開リストになります。</li>
+        <li><strong>①カウントダウン</strong>：自分のコマが乗るフラッグのダイスを-1します。0になれば確定獲得。</li>
+        <li><strong>②プレイ</strong>：好きな枠を1つリセットできます（任意）。その後、手札から1枚を枠に出します（必須）。新しい枠を使う時はフラッグを指定します。</li>
+        <li><strong>③出撃判定</strong>：枠に3枚揃うと自動で役判定。空きフラッグなら新規確保（カウント3）。相手が保持中なら、明確に強い役でのみ上書き（成功でカウント+1、上限3）。同役同数字なら先出し側の防衛。</li>
+        <li><strong>④補充</strong>：手札が5枚になるまで山札か市場から補充。市場から取ったら山札からすぐ補充します。山札が尽きたら、捨て札をシャッフルして新しい山札にします。</li>
+        <li><strong>捨て札</strong>：リセット・手札交換・上書きされて外れたカードは捨て札になります。出撃に勝ったカードはそのままフラッグ上に残り続けます。</li>
+        <li><strong>勝利</strong>：①目標形状（回転可）を3フラッグで達成 &gt; ②5フラッグ以上獲得 &gt; ③獲得数最多、の優先順位で判定します。誰も達成できず、山札・市場・捨て札のいずれも尽きて全員が手札0枚になった場合も終了します。</li>
+      </ol>
+      <button class="btn btn-primary" id="btn-close-rules">閉じる</button>
+    </div>
+  </section>
+
+  <!-- ドラフト画面（パス&プレイ） -->
+  <section id="screen-draft" class="screen">
+    <div class="panel-narrow" id="draft-panel"></div>
+  </section>
+
+  <!-- ターン受け渡しオーバーレイ -->
+  <section id="screen-handoff" class="screen">
+    <div class="handoff-wrap">
+      <p class="handoff-label">次の手番</p>
+      <h2 id="handoff-name">プレイヤー1</h2>
+      <p class="handoff-hint">端末を渡したら、タップして手番を開始してください</p>
+      <button id="btn-handoff-start" class="btn btn-primary btn-large">手番を開始</button>
+    </div>
+  </section>
+
+  <!-- メインボード -->
+  <section id="screen-board" class="screen">
+    <div id="cpu-thinking-overlay" class="cpu-overlay">
+      <div class="cpu-overlay-box">
+        <div class="cpu-overlay-avatar" id="cpu-overlay-avatar"></div>
+        <div class="cpu-overlay-name" id="cpu-overlay-name">CPU</div>
+        <div class="cpu-overlay-spinner"></div>
+        <div class="cpu-overlay-text">考えています…</div>
+      </div>
+    </div>
+    <div id="disconnect-banner" class="disconnect-banner">
+      <span id="disconnect-banner-text">〇〇さんの接続が切れています</span>
+      <span class="disconnect-banner-timer" id="disconnect-banner-timer"></span>
+      <button class="btn btn-tiny" id="btn-cpu-substitute" hidden>CPUが代打ち</button>
+      <button class="btn btn-tiny" id="btn-toggle-wait-mode" hidden>プレイヤー待機モードに切替</button>
+    </div>
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn btn-tiny btn-ghost" id="btn-quit-to-title">← タイトルへ</button>
+        <button class="btn btn-tiny handrank-open-btn" id="btn-open-handrank">役の強さ</button>
+      </div>
+      <div class="topbar-center" id="phase-indicator">カウントダウン</div>
+      <div class="topbar-right">
+        <button class="btn btn-tiny" id="btn-open-log">ログ</button>
+        <button class="btn btn-tiny" id="btn-open-discard">捨て札の内訳</button>
+      </div>
+    </header>
+
+    <main class="board-main">
+      <div class="board-side-left">
+        <div class="objective-box" id="objective-box"></div>
+        <div class="public-panel" id="public-panel"></div>
+      </div>
+
+      <div class="board-center">
+        <div class="grid-board" id="grid-board"></div>
+      </div>
+
+      <div class="board-side-right">
+        <div class="players-panel" id="players-panel"></div>
+
+        <div class="supply-row">
+          <div class="pile-block" id="deck-pile">
+            <span class="pile-label">山札</span>
+            <div class="card-back deck-back"></div>
+            <span class="pile-count" id="deck-pile-count">90</span>
+          </div>
+          <div class="market-block">
+            <span class="market-label">市場</span>
+            <div class="market-cards" id="market-cards"></div>
+          </div>
+          <div class="pile-block" id="discard-pile-visual">
+            <span class="pile-label">捨て札</span>
+            <div class="discard-fan" id="discard-fan"></div>
+            <span class="pile-count" id="discard-pile-count">0</span>
+          </div>
+        </div>
+
+        <div class="hand-panel">
+          <div class="hand-label">
+            <span id="active-player-label">プレイヤー1の手札</span>
+            <span class="action-hint" id="action-hint"></span>
+          </div>
+          <div class="hand-cards" id="hand-cards"></div>
+        </div>
+        <div class="dock-actions" id="dock-actions"></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ゲーム終了画面 -->
+  <section id="screen-over" class="screen">
+    <div class="panel-narrow" id="over-panel"></div>
+  </section>
+
+  <!-- サイドパネル：ログ -->
+  <div id="drawer-log" class="drawer">
+    <div class="drawer-head"><span>対局ログ</span><button class="btn btn-tiny" id="btn-close-log">×</button></div>
+    <ul id="log-list" class="log-list"></ul>
+  </div>
+
+  <!-- サイドパネル：捨て札 -->
+  <div id="drawer-discard" class="drawer">
+    <div class="drawer-head"><span>捨て札</span><button class="btn btn-tiny" id="btn-close-discard">×</button></div>
+    <p class="drawer-note" id="discard-drawer-note">全体で捨てられたカードは0枚です。ここでは、あなた自身が捨てたカードのみ確認できます（他人の捨て札は見えません）。</p>
+    <div id="discard-cards" class="discard-grid"></div>
+  </div>
+
+  <!-- 汎用ホバーツールチップ -->
+  <div id="hover-tooltip" class="hover-tooltip"></div>
+
+  <!-- 役の強さ フローティングパネル（×で閉じるまで前面に表示） -->
+  <div id="handrank-float" class="floating-panel">
+    <div class="floating-panel-head">
+      <span>役の強さ</span>
+      <button class="btn btn-tiny" id="btn-close-handrank-float">×</button>
+    </div>
+    <div id="handrank-float-content"></div>
+  </div>
+
+  <!-- フラッグ詳細モーダル（出撃済みカードの確認） -->
+  <div id="modal-flag-detail" class="modal">
+    <div class="modal-box">
+      <h3 id="detail-flag-title">フラッグ A</h3>
+      <div class="detail-cards" id="detail-cards"></div>
+      <div class="detail-hand-label" id="detail-hand-label"></div>
+      <div class="detail-owner-label" id="detail-owner-label"></div>
+      <div class="detail-builders" id="detail-builders"></div>
+      <button class="btn btn-ghost" id="btn-close-flag-detail" style="margin-top:14px;">閉じる</button>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="toast"></div>
+  <div id="anim-layer"></div>
+
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="avatars.js"></script>
+<script src="profile.js"></script>
+<script src="data.js"></script>
+<script src="game.js"></script>
+<script src="net.js"></script>
+<script src="room-ui.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
