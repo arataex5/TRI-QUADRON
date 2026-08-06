@@ -163,8 +163,27 @@ document.getElementById('btn-start').addEventListener('click', () => {
   highlightedPlayers.clear();
   advanceDraft(0);
 });
-document.getElementById('btn-rules').addEventListener('click', () => showScreen('screen-rules'));
+document.getElementById('btn-rules').addEventListener('click', () => { rulesCurrentPage = 1; renderRulesPage(); showScreen('screen-rules'); });
 document.getElementById('btn-close-rules').addEventListener('click', () => showScreen('screen-title'));
+
+// ---- ルール画面のページ送り ----
+let rulesCurrentPage = 1;
+const RULES_TOTAL_PAGES = document.querySelectorAll('#rules-pager .rules-page').length;
+function renderRulesPage() {
+  document.querySelectorAll('#rules-pager .rules-page').forEach(el => {
+    el.hidden = parseInt(el.dataset.page) !== rulesCurrentPage;
+  });
+  document.getElementById('rules-page-indicator').textContent = `${rulesCurrentPage} / ${RULES_TOTAL_PAGES}`;
+  document.getElementById('btn-rules-prev').disabled = rulesCurrentPage === 1;
+  document.getElementById('btn-rules-next').disabled = rulesCurrentPage === RULES_TOTAL_PAGES;
+  document.getElementById('screen-rules').scrollTop = 0;
+}
+document.getElementById('btn-rules-prev').addEventListener('click', () => {
+  if (rulesCurrentPage > 1) { rulesCurrentPage--; renderRulesPage(); }
+});
+document.getElementById('btn-rules-next').addEventListener('click', () => {
+  if (rulesCurrentPage < RULES_TOTAL_PAGES) { rulesCurrentPage++; renderRulesPage(); }
+});
 
 // ---- CPU対戦相手選択 ----
 let cpuSelection = [null, null, null]; // CPU 1〜3人目の aiType
@@ -621,6 +640,14 @@ function renderAll() {
   document.getElementById('active-player-label').textContent = state.currentPlayer === findPrivateInfoOwnerIdx()
     ? `${state.players[state.currentPlayer].name} の手札`
     : `${state.players[state.currentPlayer].name}${state.players[state.currentPlayer].isCpu ? '（CPU）' : ''} の手番`;
+
+  const roomIdEl = document.getElementById('topbar-room-id');
+  if (onlineMode && typeof NetRoom !== 'undefined' && NetRoom.roomId) {
+    roomIdEl.hidden = false;
+    document.getElementById('topbar-room-id-value').textContent = NetRoom.roomId;
+  } else {
+    roomIdEl.hidden = true;
+  }
 
   renderPlayersStrip();
   renderGridBoard();

@@ -186,16 +186,60 @@
   <!-- ルール簡易表示 -->
   <section id="screen-rules" class="screen">
     <div class="panel-narrow">
-      <h2>遊び方（要約）</h2>
-      <ol class="rules-list">
-        <li><strong>目標ドラフト</strong>：配られた2枚の目標形状カードから1枚を選び伏せます。残り4形状が公開リストになります。</li>
-        <li><strong>①カウントダウン</strong>：自分のコマが乗るフラッグのダイスを-1します。0になれば確定獲得。</li>
-        <li><strong>②プレイ</strong>：好きな枠を1つリセットできます（任意）。その後、手札から1枚を枠に出します（必須）。新しい枠を使う時はフラッグを指定します。</li>
-        <li><strong>③出撃判定</strong>：枠に3枚揃うと自動で役判定。空きフラッグなら新規確保（カウント3）。相手が保持中なら、明確に強い役でのみ上書き（成功でカウント+1、上限3）。同役同数字なら先出し側の防衛。</li>
-        <li><strong>④補充</strong>：手札が5枚になるまで山札か市場から補充。市場から取ったら山札からすぐ補充します。山札が尽きたら、捨て札をシャッフルして新しい山札にします。</li>
-        <li><strong>捨て札</strong>：リセット・手札交換・上書きされて外れたカードは捨て札になります。出撃に勝ったカードはそのままフラッグ上に残り続けます。</li>
-        <li><strong>勝利</strong>：①目標形状（回転可）を3フラッグで達成 &gt; ②5フラッグ以上獲得 &gt; ③獲得数最多、の優先順位で判定します。誰も達成できず、山札・市場・捨て札のいずれも尽きて全員が手札0枚になった場合も終了します。</li>
-      </ol>
+      <div class="rules-pager" id="rules-pager">
+        <div class="rules-page" data-page="1">
+          <h2>① このゲームの目的</h2>
+          <p class="rules-text">
+            TRI QUADRON（トライ・クアドロン）は、4人でフラッグを奪い合う頭脳戦ゲームです。<br><br>
+            盤面には4×4＝16個の「フラッグ」があります。各プレイヤーは、他の人には見せない秘密の「目標形状」を1つ持ち、
+            その形（回転は自由）になるように<strong>3つのフラッグ</strong>を獲得することを目指します。<br><br>
+            誰も目標を達成できなかった場合は、獲得したフラッグの<strong>枚数が多い人</strong>の勝ちになります。
+          </p>
+        </div>
+        <div class="rules-page" data-page="2" hidden>
+          <h2>② 準備と目標カード</h2>
+          <p class="rules-text">
+            カードは9色×1〜10の全90枚。市場には常に3枚が表向きで並び、手札は5枚を持ちます。<br><br>
+            ゲーム開始時、各プレイヤーには目標カードの候補（通常2枚）が配られ、その中から1枚を秘密の目標として選びます。<br><br>
+            選ばれなかった形状は「公開目標リスト」として全員に共有され、
+            「誰かがまだこの形を狙っている可能性がある」という手がかりになります（誰が持っているかまでは分かりません）。
+          </p>
+        </div>
+        <div class="rules-page" data-page="3" hidden>
+          <h2>③ 手番の流れ</h2>
+          <ol class="rules-list">
+            <li><strong>①カウントダウン</strong>：自分のコマが乗っているフラッグのカウントを-1します。0になれば確定獲得。</li>
+            <li><strong>②プレイ</strong>：好きな枠を1つリセットできます（任意）。その後、手札から1枚を枠に出します（必須）。新しい枠を使うときはフラッグを指定します。</li>
+            <li><strong>③出撃判定</strong>：枠に3枚揃うと自動で役判定されます。空きフラッグなら新規確保（カウント3）。相手が保持中なら、明確に強い役でのみ上書きできます（成功でカウント+1、上限3）。</li>
+            <li><strong>④補充</strong>：手札が5枚になるまで山札か市場から補充します。市場から取ったら山札からすぐ補充されます。</li>
+          </ol>
+        </div>
+        <div class="rules-page" data-page="4" hidden>
+          <h2>④ 役の強さ・捨て札</h2>
+          <p class="rules-text">
+            3枚のカードで役を作ります。強い順に「ストレートフラッシュ ＞ スリーカード ＞ フラッシュ ＞ ストレート ＞ ブタ」です。<br><br>
+            同役どうしの比較は、一番大きい数字（スリーカードはその数字自体、ブタは合計）で決まります。
+            役も数字も完全に同じ場合は上書きできず、<strong>先に出撃していた側がそのまま防衛</strong>します。<br><br>
+            リセット・手札交換・上書きに負けたカードは捨て札になります。出撃に勝ったカードは、そのままフラッグの上に残り続けます。
+            山札が尽きたら、捨て札をシャッフルして新しい山札にします。
+          </p>
+        </div>
+        <div class="rules-page" data-page="5" hidden>
+          <h2>⑤ 勝利条件</h2>
+          <p class="rules-text">
+            ゲーム終了時、以下の優先順位で勝者が決まります。<br><br>
+            <strong>① 目標形状（回転可）を3フラッグで達成した人</strong><br>
+            <strong>② 5フラッグ以上獲得した人</strong>（①がいない場合）<br>
+            <strong>③ 獲得数が最も多い人</strong>（①②どちらもいない場合）<br><br>
+            誰も目標を達成できないまま、山札・市場・捨て札のすべてが尽きて全員の手札が0枚になった場合も、そこでゲームが終了します。
+          </p>
+        </div>
+      </div>
+      <div class="rules-nav">
+        <button class="btn btn-tiny" id="btn-rules-prev">◀ 前へ</button>
+        <span class="rules-page-indicator" id="rules-page-indicator">1 / 5</span>
+        <button class="btn btn-tiny" id="btn-rules-next">次へ ▶</button>
+      </div>
       <button class="btn btn-primary" id="btn-close-rules">閉じる</button>
     </div>
   </section>
@@ -228,13 +272,13 @@
     <div id="disconnect-banner" class="disconnect-banner">
       <span id="disconnect-banner-text">〇〇さんの接続が切れています</span>
       <span class="disconnect-banner-timer" id="disconnect-banner-timer"></span>
-      <button class="btn btn-tiny" id="btn-cpu-substitute" hidden>CPUが代打ち</button>
-      <button class="btn btn-tiny" id="btn-toggle-wait-mode" hidden>プレイヤー待機モードに切替</button>
+      <button class="btn btn-tiny" id="btn-toggle-wait-mode" hidden>CPU代打ちモードに切り替え</button>
     </div>
     <header class="topbar">
       <div class="topbar-left">
         <button class="btn btn-tiny btn-ghost" id="btn-quit-to-title">← タイトルへ</button>
         <button class="btn btn-tiny handrank-open-btn" id="btn-open-handrank">役の強さ</button>
+        <span class="topbar-room-id" id="topbar-room-id" hidden>ルームID：<span id="topbar-room-id-value">-----</span></span>
       </div>
       <div class="topbar-center" id="phase-indicator">カウントダウン</div>
       <div class="topbar-right">

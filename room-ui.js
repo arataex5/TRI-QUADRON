@@ -321,20 +321,26 @@ function showDisconnectBanner(slotIdx) {
   const name = state.players[slotIdx].name;
   document.getElementById('disconnect-banner-text').textContent = `${name} さんの接続が切れています`;
   document.getElementById('disconnect-banner').classList.add('show');
-  const subBtn = document.getElementById('btn-cpu-substitute');
-  const waitBtn = document.getElementById('btn-toggle-wait-mode');
-  subBtn.hidden = false;
-  waitBtn.hidden = false;
-  subBtn.onclick = () => cpuSubstituteNow(slotIdx);
-  waitBtn.onclick = () => {
+  updateDisconnectModeButton(slotIdx);
+}
+function updateDisconnectModeButton(slotIdx) {
+  const btn = document.getElementById('btn-toggle-wait-mode');
+  btn.hidden = false;
+  btn.textContent = waitModeEnabled ? 'CPU代打ちモードに切り替え' : 'プレイヤー待機モードに切り替え';
+  btn.onclick = () => {
     waitModeEnabled = !waitModeEnabled;
-    waitBtn.textContent = waitModeEnabled ? 'プレイヤー待機モードに切替' : '即時代打ちモードに切替';
-    if (!waitModeEnabled) cpuSubstituteNow(slotIdx);
+    updateDisconnectModeButton(slotIdx);
+    if (!waitModeEnabled) {
+      cpuSubstituteNow(slotIdx);
+    } else if (state.currentPlayer === slotIdx && state.players[slotIdx] && state.players[slotIdx].connected === false) {
+      startDisconnectTimer(slotIdx);
+    }
   };
 }
 function hideDisconnectBanner() {
   document.getElementById('disconnect-banner').classList.remove('show');
   document.getElementById('disconnect-banner-timer').textContent = '';
+  document.getElementById('btn-toggle-wait-mode').hidden = true;
 }
 function startDisconnectTimer(slotIdx) {
   clearDisconnectTimer();
@@ -369,7 +375,6 @@ function hostMaybeStartGeneralTurnTimer(idx) {
   turnTimerDeadline = Date.now() + sec * 1000;
   document.getElementById('disconnect-banner-text').textContent = `${p.name} さんの手番です`;
   document.getElementById('disconnect-banner').classList.add('show');
-  document.getElementById('btn-cpu-substitute').hidden = true;
   document.getElementById('btn-toggle-wait-mode').hidden = true;
   turnTimerIntervalId = setInterval(() => {
     const remain = Math.max(0, Math.round((turnTimerDeadline - Date.now()) / 1000));
