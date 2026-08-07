@@ -30,13 +30,17 @@ function flagIdAt(row, col) {
 // cells は基準となる相対座標（正規化前）。難易度1〜5。
 const SHAPES_RAW = [
   { id: 'kagi_small',  name: 'かぎ形（小）',   difficulty: 1, cells: [[0,0],[1,0],[1,1]] },
+  { id: 'kaidan',      name: '階段形（小）',   difficulty: 1, cells: [[0,0],[1,0],[2,1]] },
   { id: 'kagi_large',  name: 'かぎ形（大）',   difficulty: 2, cells: [[0,0],[2,0],[2,1]] },
   { id: 'sankaku',     name: '三角形',         difficulty: 2, cells: [[0,0],[0,2],[1,1]] },
-  { id: 'vji',         name: '飛び石（V字）',  difficulty: 3, cells: [[0,0],[1,1],[2,0]] },
+  { id: 'tanigata',    name: '谷形',           difficulty: 2, cells: [[0,0],[0,2],[2,1]] },
   { id: 'hirogari',    name: 'コの字（広がり）', difficulty: 3, cells: [[0,0],[0,3],[1,0]] },
+  { id: 'tsuegata',    name: 'つえ形',         difficulty: 3, cells: [[0,0],[1,0],[3,1]] },
+  { id: 'furiko',      name: 'ふりこ形',       difficulty: 3, cells: [[0,0],[1,1],[3,1]] },
   { id: 'zigzag',      name: '飛び石（ジグザグ）', difficulty: 4, cells: [[0,0],[1,2],[2,1]] },
-  { id: 'ybranch',     name: 'Y字（分岐）',    difficulty: 4, cells: [[0,1],[1,0],[1,2]] },
+  { id: 'hanegata',    name: 'はね形',         difficulty: 4, cells: [[0,0],[0,3],[2,1]] },
   { id: 'daisankaku',  name: '大三角形',       difficulty: 5, cells: [[0,0],[0,3],[3,0]] },
+  { id: 'taikaku_kagi', name: '対角かぎ形',    difficulty: 5, cells: [[0,0],[1,0],[3,3]] },
 ];
 
 function normalizeCells(cells) {

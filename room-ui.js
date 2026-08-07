@@ -14,7 +14,7 @@ let waitModeEnabled = true; // true: 切断時は制限時間いっぱい待つ�
 document.getElementById('btn-start-online').addEventListener('click', () => {
   showScreen('screen-room-home');
   document.getElementById('room-home-transport-note').textContent = PeerJsTransport.available()
-    ? 'PeerJSを使ってリアルタイムに対戦します。'
+    ? ''
     : '通信ライブラリが読み込めなかったため、この端末内（別タブ）でのみ対戦できるテストモードで動作します。';
   document.getElementById('room-id-input').value = '';
   document.getElementById('room-join-error').textContent = '';
