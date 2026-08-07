@@ -1,5 +1,5 @@
 // TRI QUADRON — Service Worker（アプリシェルのキャッシュ用）
-const CACHE_NAME = 'tri-quadron-v2';
+const CACHE_NAME = 'tri-quadron-v3';
 const APP_SHELL = [
   './',
   './index.html',
