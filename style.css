@@ -571,8 +571,40 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; margin: 0 0 8px
 @media (max-width: 1300px) {
   .board-main { flex-direction: column; overflow-y: auto; }
   .board-side-left, .board-side-right { flex: none; width: 100%; min-width: 0; overflow: visible; }
-  .board-center { flex: none; overflow: visible; }
+  .board-center { flex: none; overflow: visible; order: 1; }
+  .board-side-right { order: 2; }
+  .board-side-left { order: 3; }
   .grid-board { width: min(100%, 70vh); height: auto; aspect-ratio: 1 / 1; min-height: 0; }
+}
+
+/* ===== スマホ表示（〜600px） ===== */
+@media (max-width: 600px) {
+  #screen-board { padding: 10px 10px 0; }
+  .topbar { flex-wrap: wrap; row-gap: 8px; justify-content: center; padding: 4px 0 8px; }
+  .topbar-left { order: 1; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .topbar-center { order: 0; flex-basis: 100%; text-align: center; font-size: 18px; }
+  .topbar-right { order: 2; gap: 6px; }
+  .topbar .btn-tiny { padding: 6px 9px; font-size: 11px; }
+
+  .players-panel { padding: 10px 12px; }
+  .player-chip { font-size: 11.5px; padding: 5px 8px; }
+
+  .hand-cards .card { width: 48px; height: 66px; font-size: 20px; }
+  .board-side-right .deck-back, .board-side-right .market-cards .card { width: 44px; height: 62px; font-size: 16px; }
+  .board-side-right .discard-fan { width: 62px; height: 58px; }
+  .board-side-right .discard-fan .card-back { width: 36px; height: 50px; }
+  .supply-row { gap: 8px; padding: 10px; }
+  .dock-actions .btn { font-size: 13px; padding: 10px 14px; }
+
+  .objective-shape-large .shape-mini-grid { grid-template-columns: repeat(4, 18px); grid-template-rows: repeat(4, 18px); }
+  .public-shape-row .shape-mini-grid { grid-template-columns: repeat(4, 14px); grid-template-rows: repeat(4, 14px); }
+
+  .flag-cell .flag-id { font-size: min(16vw, 60px); }
+  .flag-cell .flag-die { font-size: 9px; padding: 1px 5px; }
+
+  .panel-narrow { padding: 20px 16px; }
+  .lobby-player-row { flex-wrap: wrap; row-gap: 6px; }
+  .turnorder-select { font-size: 11px; }
 }
 
 /* ===== 役の強さ フローティングパネル ===== */

@@ -2,8 +2,19 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>TRI QUADRON — トライ・クアドロン</title>
+
+<!-- PWA: ホーム画面への追加・アプリ化対応 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c2b23">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TRI QUADRON">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -445,5 +456,13 @@
 <script src="net.js"></script>
 <script src="room-ui.js"></script>
 <script src="ui.js"></script>
+<script>
+  // PWA: Service Workerを登録（対応環境のみ・失敗しても通常のWebページとして動作継続）
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
 </body>
 </html>

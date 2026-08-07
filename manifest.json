@@ -1,0 +1,17 @@
+{
+  "name": "TRI QUADRON（トライ・クアドロン）",
+  "short_name": "TRI QUADRON",
+  "description": "役作りと陣取り、そして正体隠匿の4人用頭脳戦カードゲーム",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1c2b23",
+  "theme_color": "#1c2b23",
+  "lang": "ja",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
