@@ -122,7 +122,7 @@ class BroadcastTransport {
 // ---------------------------------------------------------
 const TURN_TIMER_OPTIONS = [0, 30, 60, 90, 180, 300]; // 0 = なし
 function defaultRoomSettings() {
-  return { turnTimerSec: 0, objectiveExcluded: [], objectiveChoiceCount: 2 };
+  return { turnTimerSec: 0, objectiveExcluded: [], objectiveChoiceCount: 2, turnOrderMode: 'random', turnOrderAssignment: [1, 2, 3, 4] };
 }
 function randomRoomId() {
   return String(Math.floor(10000 + Math.random() * 90000)); // 5桁

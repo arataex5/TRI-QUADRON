@@ -212,6 +212,19 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; margin: 0 0 8px
 .exclude-shape-row .shape-mini-grid { margin: 0; flex-shrink: 0; grid-template-columns: repeat(4, 10px); grid-template-rows: repeat(4, 10px); gap: 1px; }
 .exclude-shape-name { line-height: 1.3; }
 .choice-count-box { margin-top: 12px; text-align: center; }
+.turnorder-box { margin-top: 12px; text-align: center; }
+.turnorder-mode-options { display: flex; gap: 8px; justify-content: center; }
+.turnorder-select {
+  flex-shrink: 0; background: var(--panel); color: var(--cream); border: 1px solid rgba(242,233,211,0.25);
+  border-radius: 6px; padding: 3px 6px; font-size: 12px;
+}
+.turnorder-select:disabled { opacity: .6; }
+.offline-turnorder-mode-btn.active, .lobby-turnorder-mode-btn.active {
+  background: var(--gold-bright); color: var(--ink); border-color: transparent; font-weight: 800;
+}
+.offline-timer-btn.active, .offline-count-btn.active {
+  background: var(--gold-bright); color: var(--ink); border-color: transparent; font-weight: 800;
+}
 .choice-count-options { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .choice-count-btn { border: 1px solid rgba(242,233,211,0.2); }
 .choice-count-btn.active { background: var(--gold-bright); color: var(--ink); border-color: transparent; font-weight: 800; }

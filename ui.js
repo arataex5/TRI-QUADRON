@@ -156,15 +156,155 @@ function applyProfileToLocalPlayer0(state) {
 
 // ---- 開始 ----
 document.getElementById('btn-start').addEventListener('click', () => {
-  onlineMode = false; onlineRole = null; myOnlineSeat = null;
-  state = createInitialState();
-  applyProfileToLocalPlayer0(state);
-  dealSetup(state);
-  highlightedPlayers.clear();
-  advanceDraft(0);
+  offlineExcludedShapeIds = new Set();
+  offlineChoiceCount = 2;
+  offlineTurnTimerSec = 0;
+  offlineTurnOrderMode = 'random';
+  offlineTurnOrderAssignment = [1, 2, 3, 4];
+  renderOfflineSetupScreen();
+  showScreen('screen-offline-setup');
 });
 document.getElementById('btn-rules').addEventListener('click', () => { rulesCurrentPage = 1; renderRulesPage(); showScreen('screen-rules'); });
 document.getElementById('btn-close-rules').addEventListener('click', () => showScreen('screen-title'));
+
+// ---- オフライン対戦：設定画面 ----
+let offlineExcludedShapeIds = new Set();
+let offlineChoiceCount = 2;
+let offlineTurnTimerSec = 0;
+let offlineTurnOrderMode = 'random'; // 'random' | 'manual'
+let offlineTurnOrderAssignment = [1, 2, 3, 4]; // プレイヤー番号(0-3) -> 手番順位(1-4)
+let offlineActiveTurnTimerSec = 0; // 実際に対局へ適用された手番制限時間（オフライン用）
+
+document.getElementById('btn-offline-setup-back').addEventListener('click', () => showScreen('screen-title'));
+
+function renderOfflineSetupScreen() {
+  renderOfflineSettingsReadout();
+  renderOfflineExcludeList();
+  renderOfflinePlayerList();
+}
+function renderOfflineSettingsReadout() {
+  document.getElementById('btn-toggle-offline-timer').textContent =
+    (document.getElementById('offline-timer-box').hidden ? '▸' : '▾') + ' 手番制限時間を設定する（' + timerLabel(offlineTurnTimerSec) + '）';
+  document.getElementById('btn-toggle-offline-exclude').textContent =
+    (document.getElementById('offline-exclude-list').hidden ? '▸' : '▾') + ' 目標カードを除外する' + (offlineExcludedShapeIds.size ? `（${offlineExcludedShapeIds.size}枚除外中）` : '');
+  document.getElementById('btn-toggle-offline-count').textContent =
+    (document.getElementById('offline-count-box').hidden ? '▸' : '▾') + ` 選択肢数を設定する（${offlineChoiceCount}枚）`;
+  document.getElementById('btn-toggle-offline-turnorder').textContent =
+    (document.getElementById('offline-turnorder-box').hidden ? '▸' : '▾') + ' 手番順を設定する（' + (offlineTurnOrderMode === 'random' ? 'ランダム' : '設定する') + '）';
+  document.querySelectorAll('.offline-timer-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.sec) === offlineTurnTimerSec));
+  document.querySelectorAll('.offline-count-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.count) === offlineChoiceCount));
+  document.querySelectorAll('.offline-turnorder-mode-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === offlineTurnOrderMode));
+}
+function renderOfflineExcludeList() {
+  const el = document.getElementById('offline-exclude-list');
+  el.innerHTML = SHAPES.map(s => `
+    <label class="exclude-shape-row">
+      <input type="checkbox" data-shape="${s.id}" ${offlineExcludedShapeIds.has(s.id) ? 'checked' : ''}>
+      ${shapeMiniGridHTML(s)}
+      <span class="exclude-shape-name">${s.name} ${'★'.repeat(s.difficulty)}${'☆'.repeat(5 - s.difficulty)}</span>
+    </label>
+  `).join('');
+  el.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) offlineExcludedShapeIds.add(cb.dataset.shape);
+      else offlineExcludedShapeIds.delete(cb.dataset.shape);
+      renderOfflineSettingsReadout();
+    });
+  });
+}
+function renderOfflinePlayerList() {
+  const el = document.getElementById('offline-player-list');
+  el.innerHTML = PLAYER_NAMES.map((name, i) => `
+    <div class="lobby-player-row">
+      <span class="lobby-player-seat">P${i + 1}</span>
+      <span class="lobby-player-name">${name}</span>
+      ${offlineTurnOrderMode === 'manual' ? `
+        <select class="turnorder-select" data-pidx="${i}">
+          ${[1, 2, 3, 4].map(n => `<option value="${n}" ${offlineTurnOrderAssignment[i] === n ? 'selected' : ''}>${n}番目</option>`).join('')}
+        </select>
+      ` : ''}
+    </div>
+  `).join('');
+  el.querySelectorAll('.turnorder-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      offlineTurnOrderAssignment[parseInt(sel.dataset.pidx)] = parseInt(sel.value);
+    });
+  });
+}
+document.getElementById('btn-toggle-offline-timer').addEventListener('click', () => {
+  const box = document.getElementById('offline-timer-box');
+  box.hidden = !box.hidden;
+  renderOfflineSettingsReadout();
+});
+document.getElementById('btn-toggle-offline-exclude').addEventListener('click', () => {
+  const box = document.getElementById('offline-exclude-list');
+  box.hidden = !box.hidden;
+  renderOfflineSettingsReadout();
+});
+document.getElementById('btn-toggle-offline-count').addEventListener('click', () => {
+  const box = document.getElementById('offline-count-box');
+  box.hidden = !box.hidden;
+  renderOfflineSettingsReadout();
+});
+document.getElementById('btn-toggle-offline-turnorder').addEventListener('click', () => {
+  const box = document.getElementById('offline-turnorder-box');
+  box.hidden = !box.hidden;
+  renderOfflineSettingsReadout();
+});
+document.querySelectorAll('.offline-timer-btn').forEach(btn => {
+  btn.addEventListener('click', () => { offlineTurnTimerSec = parseInt(btn.dataset.sec); renderOfflineSettingsReadout(); });
+});
+document.querySelectorAll('.offline-count-btn').forEach(btn => {
+  btn.addEventListener('click', () => { offlineChoiceCount = parseInt(btn.dataset.count); renderOfflineSettingsReadout(); });
+});
+document.querySelectorAll('.offline-turnorder-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    offlineTurnOrderMode = btn.dataset.mode;
+    renderOfflineSettingsReadout();
+    renderOfflinePlayerList();
+  });
+});
+document.getElementById('btn-offline-setup-start').addEventListener('click', () => {
+  const availableCount = SHAPES.length - offlineExcludedShapeIds.size;
+  if (availableCount < offlineChoiceCount) {
+    window.alert(`目標カードを除外しすぎています。残り${availableCount}枚に対して、選択肢数${offlineChoiceCount}枚を用意できません。`);
+    return;
+  }
+  if (offlineTurnOrderMode === 'manual') {
+    const positions = [...offlineTurnOrderAssignment].sort((a, b) => a - b);
+    const isValidPermutation = positions.every((v, i) => v === i + 1);
+    if (!isValidPermutation) {
+      window.alert('手番順は1〜4がそれぞれ1回ずつになるように設定してください。');
+      return;
+    }
+  }
+  onlineMode = false; onlineRole = null; myOnlineSeat = null;
+  state = createInitialState();
+  dealSetup(state, { objectiveExcluded: [...offlineExcludedShapeIds], objectiveChoiceCount: offlineChoiceCount });
+  pendingTurnOrderMode = offlineTurnOrderMode;
+  pendingTurnOrderAssignment = offlineTurnOrderAssignment;
+  offlineActiveTurnTimerSec = offlineTurnTimerSec;
+  highlightedPlayers.clear();
+  advanceDraft(0);
+});
+
+// 手番順（ランダム／手動指定）を実際のstateに適用する共通処理
+// mode: 'identity'（既定の座席順のまま・CPU戦やプレーンなパス&プレイ用）/ 'random' / 'manual'
+let pendingTurnOrderMode = 'identity';
+let pendingTurnOrderAssignment = [1, 2, 3, 4];
+function applyTurnOrderSetting(state, mode, assignment) {
+  let order;
+  if (mode === 'manual' && Array.isArray(assignment)) {
+    order = [0, 1, 2, 3].slice().sort((a, b) => assignment[a] - assignment[b]);
+  } else if (mode === 'random') {
+    order = shuffle([0, 1, 2, 3]);
+  } else {
+    return; // identity：既存の座席順のまま変更しない
+  }
+  state.turnOrder = order;
+  state.currentPlayer = order[0];
+}
+
 
 // ---- ルール画面のページ送り ----
 let rulesCurrentPage = 1;
@@ -324,6 +464,7 @@ function renderCpuSeats() {
     });
   });
 }
+document.getElementById('btn-cpu-select-back').addEventListener('click', () => showScreen('screen-title'));
 document.getElementById('btn-cpu-select-reset').addEventListener('click', () => {
   cpuSelection = [null, null, null];
   renderCpuSelectScreen();
@@ -367,6 +508,9 @@ document.getElementById('btn-handoff-start').addEventListener('click', () => {
 function advanceDraft(idx) {
   if (idx > 3) {
     finalizeDraft(state);
+    applyTurnOrderSetting(state, pendingTurnOrderMode, pendingTurnOrderAssignment);
+    pendingTurnOrderMode = 'identity';
+    pendingTurnOrderAssignment = [1, 2, 3, 4];
     proceedToTurn();
     return;
   }
@@ -516,6 +660,7 @@ function hostApplyRemoteAction(fromSeat, action) {
       chooseObjective(state, fromSeat, payload.shapeId);
       if (state.players.every(p => p.objective)) {
         finalizeDraft(state);
+        applyTurnOrderSetting(state, NetRoom.settings.turnOrderMode, NetRoom.settings.turnOrderAssignment);
         proceedToTurn();
       }
       // 全員そろっていない間は、他のプレイヤーの見た目（待機中）は変わらないため再送不要

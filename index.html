@@ -31,9 +31,9 @@
         <button class="btn btn-tiny" id="btn-edit-profile">プロフィール編集</button>
       </div>
 
-      <button id="btn-start" class="btn btn-primary btn-large">対局を始める（4人でパス&プレイ）</button>
-      <button id="btn-start-cpu" class="btn btn-primary btn-large">CPUと対戦する</button>
-      <button id="btn-start-online" class="btn btn-primary btn-large">オンラインで対戦する</button>
+      <button id="btn-start-cpu" class="btn btn-primary btn-large">CPU対戦</button>
+      <button id="btn-start" class="btn btn-primary btn-large">オフライン対戦</button>
+      <button id="btn-start-online" class="btn btn-primary btn-large">オンライン対戦</button>
       <button id="btn-rules" class="btn btn-ghost">ルールを見る</button>
     </div>
   </section>
@@ -63,6 +63,57 @@
       </div>
     </div>
   </div>
+
+  <!-- オフライン対戦：設定画面 -->
+  <section id="screen-offline-setup" class="screen">
+    <div class="panel-narrow panel-wide">
+      <h2>オフライン対戦の設定</h2>
+      <p class="draft-note">同じ端末で4人がパス&プレイで対戦します。プレイヤー名は固定です。</p>
+
+      <div class="objective-settings-box">
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-offline-timer">▸ 手番制限時間を設定する（なし）</button>
+        <div class="timer-options-box" id="offline-timer-box" hidden>
+          <div class="timer-options" id="offline-timer-options">
+            <button type="button" class="btn btn-tiny offline-timer-btn" data-sec="0">なし</button>
+            <button type="button" class="btn btn-tiny offline-timer-btn" data-sec="30">30秒</button>
+            <button type="button" class="btn btn-tiny offline-timer-btn" data-sec="60">60秒</button>
+            <button type="button" class="btn btn-tiny offline-timer-btn" data-sec="90">90秒</button>
+            <button type="button" class="btn btn-tiny offline-timer-btn" data-sec="180">180秒</button>
+            <button type="button" class="btn btn-tiny offline-timer-btn" data-sec="300">300秒</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-offline-exclude">▸ 目標カードを除外する</button>
+        <div class="objective-exclude-list" id="offline-exclude-list" hidden></div>
+
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-offline-count">▸ 選択肢数を設定する（2枚）</button>
+        <div class="choice-count-box" id="offline-count-box" hidden>
+          <div class="choice-count-options" id="offline-count-options">
+            <button type="button" class="btn btn-tiny offline-count-btn" data-count="1">1枚</button>
+            <button type="button" class="btn btn-tiny offline-count-btn" data-count="2">2枚</button>
+            <button type="button" class="btn btn-tiny offline-count-btn" data-count="3">3枚</button>
+            <button type="button" class="btn btn-tiny offline-count-btn" data-count="4">4枚</button>
+            <button type="button" class="btn btn-tiny offline-count-btn" data-count="5">5枚</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-offline-turnorder">▸ 手番順を設定する（ランダム）</button>
+        <div class="turnorder-box" id="offline-turnorder-box" hidden>
+          <div class="turnorder-mode-options" id="offline-turnorder-mode-options">
+            <button type="button" class="btn btn-tiny offline-turnorder-mode-btn" data-mode="random">ランダム</button>
+            <button type="button" class="btn btn-tiny offline-turnorder-mode-btn" data-mode="manual">設定する</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lobby-player-list" id="offline-player-list"></div>
+
+      <div class="lobby-footer">
+        <button class="btn btn-ghost" id="btn-offline-setup-back">タイトルへ戻る</button>
+        <button class="btn btn-primary btn-large" id="btn-offline-setup-start">対局を始める</button>
+      </div>
+    </div>
+  </section>
 
   <!-- CPU対戦相手 選択画面 -->
   <!-- オンライン対戦：ルームホーム（作成／入室） -->
@@ -118,6 +169,14 @@
             <button type="button" class="btn btn-tiny lobby-count-btn" data-count="3">3枚</button>
             <button type="button" class="btn btn-tiny lobby-count-btn" data-count="4">4枚</button>
             <button type="button" class="btn btn-tiny lobby-count-btn" data-count="5">5枚</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-tiny settings-toggle" id="btn-toggle-lobby-turnorder">▸ 手番順を設定する（ランダム）</button>
+        <div class="turnorder-box" id="lobby-turnorder-box" hidden>
+          <div class="turnorder-mode-options" id="lobby-turnorder-mode-options">
+            <button type="button" class="btn btn-tiny lobby-turnorder-mode-btn" data-mode="random">ランダム</button>
+            <button type="button" class="btn btn-tiny lobby-turnorder-mode-btn" data-mode="manual">設定する</button>
           </div>
         </div>
       </div>
@@ -177,6 +236,7 @@
 
       <div class="cpu-select-grid" id="cpu-select-grid"></div>
       <div class="cpu-select-footer">
+        <button class="btn btn-ghost" id="btn-cpu-select-back">タイトルへ戻る</button>
         <button class="btn btn-ghost" id="btn-cpu-select-reset">選び直す</button>
         <button class="btn btn-primary btn-large" id="btn-cpu-select-start" disabled>対局を始める</button>
       </div>

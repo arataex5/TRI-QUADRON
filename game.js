@@ -409,7 +409,8 @@ function endTurnAdvance(state) {
     state.gameOverTriggeredAtTurn = state.turnCount;
     logMsg(state, '終了条件成立！ 全員が同じ手番数を終えたらゲーム終了です。');
   }
-  const nextIdx = (state.players.findIndex(p => p.idx === state.currentPlayer) + 1) % 4;
+  const posInOrder = state.turnOrder.indexOf(state.currentPlayer);
+  const nextIdx = (posInOrder + 1) % 4;
   state.currentPlayer = state.turnOrder[nextIdx];
 
   if (state.gameOverTriggeredAtTurn !== null && state.turnCount % 4 === 0 && state.turnCount >= state.gameOverTriggeredAtTurn) {

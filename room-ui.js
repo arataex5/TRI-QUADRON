@@ -3,6 +3,8 @@
 let lobbyExcludedShapeIds = new Set();
 let lobbyChoiceCount = 2;
 let lobbyTurnTimerSec = 0;
+let lobbyTurnOrderMode = 'random';
+let lobbyTurnOrderAssignment = [1, 2, 3, 4];
 let lobbyCpuPickTargetSlot = null;
 let turnTimerIntervalId = null;
 let turnTimerDeadline = null;
@@ -76,6 +78,8 @@ function enterLobby() {
   lobbyExcludedShapeIds = new Set();
   lobbyChoiceCount = 2;
   lobbyTurnTimerSec = 0;
+  lobbyTurnOrderMode = 'random';
+  lobbyTurnOrderAssignment = [1, 2, 3, 4];
   showScreen('screen-room-lobby');
 }
 
@@ -89,20 +93,23 @@ function renderLobby(slots, roomName, roomId, settings) {
   lobbyTurnTimerSec = settings.turnTimerSec;
   lobbyExcludedShapeIds = new Set(settings.objectiveExcluded);
   lobbyChoiceCount = settings.objectiveChoiceCount;
+  lobbyTurnOrderMode = settings.turnOrderMode || 'random';
+  lobbyTurnOrderAssignment = settings.turnOrderAssignment || [1, 2, 3, 4];
   renderLobbySettingsReadout();
   if (isHost) renderLobbySettingsControls();
 
-  document.querySelectorAll('#timer-options-box .timer-btn, #lobby-count-box .lobby-count-btn').forEach(btn => {
+  document.querySelectorAll('#timer-options-box .timer-btn, #lobby-count-box .lobby-count-btn, #lobby-turnorder-box .lobby-turnorder-mode-btn').forEach(btn => {
     btn.disabled = !isHost;
   });
   document.querySelectorAll('#lobby-exclude-list input').forEach(cb => { cb.disabled = !isHost; });
 
   renderLobbyPlayerList(slots, isHost);
 
+  const filledCount = slots.filter(s => s).length;
   const allReady = slots.every(s => s === null || s.ready);
   const startBtn = document.getElementById('btn-lobby-start');
   startBtn.hidden = !isHost;
-  startBtn.disabled = !allReady || slots.filter(s => s).length < 2;
+  startBtn.disabled = !allReady || filledCount < 4;
 
   const mySlot = slots[NetRoom.mySlotIndex];
   const readyBtn = document.getElementById('btn-my-ready');
@@ -112,8 +119,8 @@ function renderLobby(slots, roomName, roomId, settings) {
     readyBtn.classList.toggle('btn-ok', !!mySlot.ready);
   }
 
-  document.getElementById('lobby-note').textContent = slots.filter(s => s).length < 2
-    ? 'あと1人以上、参加者かCPUが必要です。'
+  document.getElementById('lobby-note').textContent = filledCount < 4
+    ? `4人（参加者かCPU）がそろうまで開始できません。（あと${4 - filledCount}人）`
     : (allReady ? '' : '全員が準備完了になるとゲームを開始できます。');
 }
 
@@ -124,6 +131,8 @@ function renderLobbySettingsReadout() {
     (document.getElementById('lobby-exclude-list').hidden ? '▸' : '▾') + ' 目標カードを除外する' + (lobbyExcludedShapeIds.size ? `（${lobbyExcludedShapeIds.size}枚除外中）` : '');
   document.getElementById('btn-toggle-lobby-count').textContent =
     (document.getElementById('lobby-count-box').hidden ? '▸' : '▾') + ` 選択肢数を設定する（${lobbyChoiceCount}枚）`;
+  document.getElementById('btn-toggle-lobby-turnorder').textContent =
+    (document.getElementById('lobby-turnorder-box').hidden ? '▸' : '▾') + ' 手番順を設定する（' + (lobbyTurnOrderMode === 'random' ? 'ランダム' : '設定する') + '）';
 }
 function timerLabel(sec) {
   return sec === 0 ? 'なし' : sec + '秒';
@@ -131,6 +140,7 @@ function timerLabel(sec) {
 function renderLobbySettingsControls() {
   document.querySelectorAll('.timer-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.sec) === lobbyTurnTimerSec));
   document.querySelectorAll('.lobby-count-btn').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.count) === lobbyChoiceCount));
+  document.querySelectorAll('.lobby-turnorder-mode-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === lobbyTurnOrderMode));
   const listEl = document.getElementById('lobby-exclude-list');
   if (!listEl.dataset.built) {
     listEl.innerHTML = SHAPES.map(s => `
@@ -168,6 +178,11 @@ document.getElementById('btn-toggle-lobby-count').addEventListener('click', () =
   box.hidden = !box.hidden;
   renderLobbySettingsReadout();
 });
+document.getElementById('btn-toggle-lobby-turnorder').addEventListener('click', () => {
+  const box = document.getElementById('lobby-turnorder-box');
+  box.hidden = !box.hidden;
+  renderLobbySettingsReadout();
+});
 document.querySelectorAll('.timer-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (NetRoom.role !== 'host') return;
@@ -180,6 +195,12 @@ document.querySelectorAll('.lobby-count-btn').forEach(btn => {
     NetRoom.hostUpdateSettings({ objectiveChoiceCount: parseInt(btn.dataset.count) });
   });
 });
+document.querySelectorAll('.lobby-turnorder-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (NetRoom.role !== 'host') return;
+    NetRoom.hostUpdateSettings({ turnOrderMode: btn.dataset.mode });
+  });
+});
 
 document.getElementById('btn-edit-room-name').addEventListener('click', () => {
   const name = window.prompt('ルーム名を入力してください（24文字まで）', document.getElementById('lobby-room-name').textContent);
@@ -190,6 +211,11 @@ document.getElementById('btn-edit-room-name').addEventListener('click', () => {
 // ---- プレイヤー一覧 ----
 function renderLobbyPlayerList(slots, isHost) {
   const el = document.getElementById('lobby-player-list');
+  const showOrder = lobbyTurnOrderMode === 'manual';
+  const orderSelectHTML = (i) => showOrder ? `
+    <select class="turnorder-select" data-pidx="${i}" ${isHost ? '' : 'disabled'}>
+      ${[1, 2, 3, 4].map(n => `<option value="${n}" ${lobbyTurnOrderAssignment[i] === n ? 'selected' : ''}>${n}番目</option>`).join('')}
+    </select>` : '';
   el.innerHTML = slots.map((s, i) => {
     if (!s) {
       return `
@@ -206,6 +232,7 @@ function renderLobbyPlayerList(slots, isHost) {
           <span class="lobby-player-seat">P${i + 1}</span>
           <span class="lobby-player-avatar">${c ? c.avatar : ''}</span>
           <span class="lobby-player-name">${c ? c.name : 'CPU'}<span class="cpu-tag">CPU</span></span>
+          ${orderSelectHTML(i)}
           <span class="lobby-ready-dot ready">準備OK</span>
           ${isHost ? `<button class="btn btn-tiny" data-remove-seat="${i}">×</button>` : ''}
         </div>`;
@@ -217,11 +244,20 @@ function renderLobbyPlayerList(slots, isHost) {
         <span class="lobby-player-seat">P${i + 1}</span>
         <span class="lobby-player-avatar">${avatarSvg}</span>
         <span class="lobby-player-name">${s.name}${isMe ? '（あなた）' : ''}${!s.connected ? '<span class="lobby-disconnected-tag">切断中</span>' : ''}</span>
+        ${orderSelectHTML(i)}
         <span class="lobby-ready-dot ${s.ready ? 'ready' : ''}">${s.ready ? '準備OK' : '未準備'}</span>
         ${isHost && !isMe ? `<button class="btn btn-tiny" data-remove-seat="${i}">×</button>` : ''}
       </div>`;
   }).join('');
 
+  el.querySelectorAll('.turnorder-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      if (NetRoom.role !== 'host') return;
+      const next = [...lobbyTurnOrderAssignment];
+      next[parseInt(sel.dataset.pidx)] = parseInt(sel.value);
+      NetRoom.hostUpdateSettings({ turnOrderAssignment: next });
+    });
+  });
   el.querySelectorAll('[data-add-cpu]').forEach(btn => {
     btn.addEventListener('click', () => openLobbyCpuPick(parseInt(btn.dataset.addCpu)));
   });
@@ -281,6 +317,7 @@ document.getElementById('btn-leave-room').addEventListener('click', () => {
 });
 document.getElementById('btn-lobby-start').addEventListener('click', () => {
   if (NetRoom.role !== 'host') return;
+  if (NetRoom.slots.filter(s => s).length < 4 || !NetRoom.slots.every(s => s === null || s.ready)) return;
   const seatConfig = NetRoom.hostBuildSeatConfig();
   onlineMode = true; onlineRole = 'host'; myOnlineSeat = NetRoom.mySlotIndex;
   state = createInitialState(seatConfig);
@@ -295,6 +332,7 @@ document.getElementById('btn-lobby-start').addEventListener('click', () => {
     renderDraftFor(myOnlineSeat);
   } else if (state.players.every(p => p.objective)) {
     finalizeDraft(state);
+    applyTurnOrderSetting(state, NetRoom.settings.turnOrderMode, NetRoom.settings.turnOrderAssignment);
     proceedToTurn();
   }
 });
@@ -366,12 +404,16 @@ function cpuSubstituteNow(slotIdx) {
 
 // ---- 通常の手番制限時間（ルーム設定）：接続中プレイヤーが時間内に動かない場合も代打ちする ----
 function hostMaybeStartGeneralTurnTimer(idx) {
-  if (!onlineMode || onlineRole !== 'host' || !state) return;
+  if (!state) return;
+  const isOnlineHost = onlineMode && onlineRole === 'host';
+  const isOfflineLocal = !onlineMode;
+  if (!isOnlineHost && !isOfflineLocal) return; // ゲストはホストの通知に従うだけなので自前のタイマーは持たない
   clearDisconnectTimer();
   hideDisconnectBanner();
-  const sec = NetRoom.settings.turnTimerSec;
+  const sec = isOnlineHost ? NetRoom.settings.turnTimerSec : offlineActiveTurnTimerSec;
   const p = state.players[idx];
-  if (!sec || p.isCpu || p.connected === false) return;
+  if (!sec || p.isCpu) return;
+  if (isOnlineHost && p.connected === false) return; // 切断中は切断用のロジックに任せる
   turnTimerDeadline = Date.now() + sec * 1000;
   document.getElementById('disconnect-banner-text').textContent = `${p.name} さんの手番です`;
   document.getElementById('disconnect-banner').classList.add('show');
